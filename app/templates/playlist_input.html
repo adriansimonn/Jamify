@@ -1,0 +1,31 @@
+<!-- Author: Adrian Simon-->
+<!-- Description: This is the input page containing a form for the user to input the playlist description and length (in songs). -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamify | Playlist Generator</title>
+</head>
+<body>
+    <h1>Generate Your Playlist</h1>
+    <button onclick="window.location.href='/logout'">Log Out</button>
+    <form action="/preview_playlist" method="POST">
+        <!-- Playlist Description Input -->
+        <label for="description">Playlist Description:</label><br>
+        <textarea id="description" name="playlistDescription" rows="2" cols="30" placeholder="Shortly describe the vibe of your playlist... \n e.g., 'Lively pop music from the 90s'" required></textarea><br><br>
+
+        <!-- Playlist Length Input -->
+        <label for="length">Playlist Size (in songs):</label><br>
+        <input type="number" id="length" name="playlistSize" min="1" placeholder="Enter length in songs" required><br><br>
+
+        <!-- Explicit Content Preference -->
+        <label for="explicit">Exclude Explicit Content:</label>
+        <input type="checkbox" id="explicit" name="excludeExplicit"><br><br>        
+
+        <!-- Submit Button -->
+        <button type="submit">Generate Playlist</button>
+    </form>
+</body>
+</html>

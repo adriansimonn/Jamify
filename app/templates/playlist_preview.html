@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Generated Playlist Preview</title>
+    </head>
+    <body>
+        <h1>Playlist Preview</h1>
+        <p>Dont like what you see? Click 'Discard' to delete the playlist and try again!</p>
+        <p>Note that this is a temporary playlist created in your library for preview.</p>
+        <iframe
+            src = "https://open.spotify.com/embed/playlist/{{ playlistID }}"
+            width = "100%"
+            height = "480"
+            frameborder = "0"
+            allowtransparancy = "true"
+            allow = "encrypted-media">
+        </iframe>
+        <button onclick="window.location.href='/save_playlist'">Save to Library</button>
+        <button onclick="window.location.href='/discard_playlist'">Discard</button>
+    </body>
+</html>
