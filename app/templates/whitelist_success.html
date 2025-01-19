@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Submitted</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="corner-logo">
+            <img src="{{ url_for('static', filename='images/logohc.png') }}" alt="Logo">
+        </div>
+        <div class="content-wrapper">
+            <h1>Success</h1>
+            <p>Your email has been successfully submitted for request into the whitelist. Check back soon!</p>
+            <div class="button-container">
+                <button class="btn" onclick="window.location.href='/logout'">Continue</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

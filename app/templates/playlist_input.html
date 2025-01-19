@@ -7,25 +7,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jamify | Playlist Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Generate Your Playlist</h1>
-    <button onclick="window.location.href='/logout'">Log Out</button>
-    <form action="/preview_playlist" method="POST">
-        <!-- Playlist Description Input -->
-        <label for="description">Playlist Description:</label><br>
-        <textarea id="description" name="playlistDescription" rows="2" cols="30" placeholder="Shortly describe the vibe of your playlist... \n e.g., 'Lively pop music from the 90s'" required></textarea><br><br>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Generating Playlist</p>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="corner-logo">
+            <img src="{{ url_for('static', filename='images/logohc.png') }}" alt="Logo">
+        </div>
+        <div class="button-container" style="justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="window.location.href='/logout'">Log Out</button>
+        </div>
+        
+        <h1>Generate Your Playlist</h1>
+        
+        <form id= "playlistForm" action="/preview_playlist" method="POST">
+            <div class="form-group">
+                <label for="description">Playlist Description:</label>
+                <textarea 
+                    id="description" 
+                    name="playlistDescription" 
+                    rows="2" 
+                    placeholder="Shortly describe the vibe of your playlist. (Example: 'Lively pop music from the 90s')" 
+                    required
+                ></textarea>
+            </div>
 
-        <!-- Playlist Length Input -->
-        <label for="length">Playlist Size (in songs):</label><br>
-        <input type="number" id="length" name="playlistSize" min="1" placeholder="Enter length in songs" required><br><br>
+            <div class="form-group">
+                <label for="length">Playlist Size:</label>
+                <input 
+                    type="number" 
+                    id="length" 
+                    name="playlistSize" 
+                    min="1" 
+                    placeholder="Number of songs in your playlist" 
+                    required
+                >
+            </div>
 
-        <!-- Explicit Content Preference -->
-        <label for="explicit">Exclude Explicit Content:</label>
-        <input type="checkbox" id="explicit" name="excludeExplicit"><br><br>        
+            <div class="checkbox-container">
+                <input type="checkbox" id="explicit" name="excludeExplicit">
+                <label for="explicit">Exclude Explicit Content</label>
+            </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Generate Playlist</button>
-    </form>
+            <div class="button-container">
+                <button type="submit" class="btn">Generate Playlist</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('playlistForm').addEventListener('submit', function(e) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        });
+    </script>
 </body>
 </html>

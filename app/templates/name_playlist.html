@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Name Your Playlist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="corner-logo">
+            <img src="{{ url_for('static', filename='images/logohc.png') }}" alt="Logo">
+        </div>
+        <h1>Name Your Playlist</h1>
+        <form action="/save_playlist" method="POST">
+            <input type="hidden" name="playlist_id" value="{{ playlist_id }}">
+            <input type="hidden" name="description" value="{{ description }}">
+            
+            <div class="form-group">
+                <label for="playlist_name">Playlist Name:</label>
+                <input 
+                    type="text" 
+                    id="playlist_name" 
+                    name="playlist_name" 
+                    placeholder="{{ suggested_name }}" 
+                    value="{{ suggested_name }}"
+                >
+            </div>
+            
+            <div class="button-container">
+                <button type="submit" class="btn">Save Playlist</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/return_to_preview/{{ playlist_id }}'">Back</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

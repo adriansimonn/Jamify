@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, request, session, url_for, current_app, render_template, jsonify
-from .spotify import getPotentialTracks, searchForPlaylists, getPreviewURLS, getTokenFromCode, getUserID, createTempPlaylist, addTracksToPlaylist, test_spotify_api
-from .gpt_integration import generateKeyphrases
+from flask import Blueprint, redirect, request, session, url_for, current_app, render_template
+from .spotify import getPotentialTracks, searchForPlaylists, getTokenFromCode, getUserID, createTempPlaylist, addTracksToPlaylist, updatePlaylist, deletePlaylist
+from .gpt_integration import generateKeyphrases, generatePlaylistName
+import os
 
 bp = Blueprint('routes', __name__)
 
@@ -15,7 +16,6 @@ def login():
         "user-read-email",
         "playlist-modify-public",
         "playlist-modify-private",
-        "user-top-read"
     ])
     
     authURL = (
@@ -41,26 +41,9 @@ def callback():
     session['access_token'] = token
     return redirect(url_for('routes.create_playlist'))
 
-@bp.route('/generate_playlist')
-def generate_playlist():
-    accessToken = session.get('access_token')
-    if not accessToken:
-        return redirect(url_for('routes.login'))
-    
-    previewURLS = getPreviewURLS(accessToken)
-    return {"preview_urls": previewURLS}
-
 @bp.route('/create_playlist', methods=['GET'])
 def create_playlist():
     return render_template('playlist_input.html')
-
-@bp.route('/submit_description', methods=['POST'])
-def submit_description():
-    description = request.form.get('playlistDescription')
-    length = request.form.get('playlistSize')
-    excludeExplicit = request.form.get('excludeExplicit')
-    print(f"Description: {description}, Length: {length}", f"Exclude Explicit: {excludeExplicit}")
-    return redirect(url_for('routes.generate_playlist'))
 
 @bp.route('/preview_playlist', methods=['POST'])
 def preview_playlist():
@@ -75,20 +58,114 @@ def preview_playlist():
     
     keywords = generateKeyphrases(description)
     if keywords == ["none"]:
-        print("No keywords generated.")
-        return redirect(url_for('routes.create_playlist'))
+        print("No keyphrases generated.")
+        return render_template('error_processing.html')
 
     userID = getUserID(accessToken)
     playlistID = createTempPlaylist(accessToken, userID)
+    if playlistID == "whitelist needed":
+        return render_template('whitelist_form.html')
     if not playlistID:
-        print("Playlist creation failed.")
-        return redirect(url_for('routes.create_playlist'))
+        return render_template('error_spotify_create.html')
 
     playlists = searchForPlaylists(accessToken, keywords)
-    tracks = getPotentialTracks(accessToken, playlists, numSongs)
+    if playlists is None:
+        playlist_id = request.args.get('id')
+        access_token = session.get('access_token')
+    
+        if access_token and playlist_id:
+            deletePlaylist(access_token, playlist_id)
+        return render_template('error_spotify_fetch.html')
+
+    tracks = getPotentialTracks(accessToken, playlists, numSongs, excludeExplicit)
+    if tracks is None:
+        playlist_id = request.args.get('id')
+        access_token = session.get('access_token')
+    
+        if access_token and playlist_id:
+            deletePlaylist(access_token, playlist_id)
+        return render_template('error_spotify_fetch.html')
+    
     print("Tracks generated:", tracks)
     trackURIs = [f"spotify:track:{track}" for track in tracks]
     addTracksToPlaylist(accessToken, playlistID, trackURIs)
 
     print(f"Generated playlist ID: {playlistID}")
-    return render_template('playlist_preview.html', playlistID=playlistID)
+    session['playlist_description'] = description
+    session['playlist_id'] = playlistID
+    return render_template('playlist_preview.html', playlistID=playlistID, description=description)
+
+@bp.route('/return_to_preview/<playlist_id>')
+def return_to_preview(playlist_id):
+    return render_template('playlist_preview.html', playlistID=playlist_id)
+
+@bp.route('/save_playlist/<playlist_id>', methods=['GET'])
+def save_playlist_form(playlist_id):
+    description = session.get('playlist_description', '')
+    suggested_name = generatePlaylistName(description)
+    
+    return render_template('name_playlist.html', 
+                         playlist_id=playlist_id,
+                         description=description,
+                         suggested_name=suggested_name)
+
+@bp.route('/save_playlist', methods=['POST'])
+def save_playlist():
+    playlist_id = request.form.get('playlist_id')
+    description = session['playlist_description']
+    playlist_name = request.form.get('playlist_name').strip()
+
+    print(f"Debug - Playlist ID: {playlist_id}")  # Debug print
+    
+    if not playlist_name:
+        playlist_name = generatePlaylistName(description)
+    
+    access_token = session.get('access_token')
+    if not access_token:
+        return redirect(url_for('routes.login'))
+    
+    full_description = f"{description}. Playlist generated by Jamify."
+    success = updatePlaylist(access_token, playlist_id, playlist_name, full_description)
+    
+    if not success:
+        print("Failed to update playlist")
+        
+    full_description = f"{description}. Playlist generated by Jamify."
+    updatePlaylist(access_token, playlist_id, playlist_name, full_description)
+    
+    session.pop('playlist_description', None)
+    
+    return render_template('playlist_success.html')
+
+@bp.route('/discard_playlist')
+def discard_playlist():
+    playlist_id = request.args.get('id')
+    access_token = session.get('access_token')
+    
+    if access_token and playlist_id:
+        deletePlaylist(access_token, playlist_id)
+        session.pop('playlist_description', None)
+    
+    return render_template('playlist_discarded.html')
+
+@bp.route('/whitelist_request', methods=['GET'])
+def whitelist_form():
+    return render_template('whitelist_form.html')
+
+@bp.route('/submit_email', methods=['POST'])
+def submit_email():
+    email = request.form.get('email')
+    if not email or email.index("@") == -1:
+        return redirect(url_for('/whitelist_request'))
+
+    # Save the email to a file or database (e.g., append to a text file)
+    try:
+        whitelist_file = os.path.join(current_app.instance_path, 'whitelist_requests.txt')
+        os.makedirs(os.path.dirname(whitelist_file), exist_ok=True)
+    
+        with open(whitelist_file, 'a') as f:
+            f.write(f"{email}\n")
+
+        return render_template('whitelist_success.html')
+    except Exception as e:
+        return redirect(url_for('/whitelist_request'))

@@ -1,0 +1,351 @@
+:root {
+    --primary-color: #1DB954;
+    --secondary-color: #191414;
+    --text-color: #FFFFFF;
+    --container-bg: #161918;     /* Dark container background */
+    --hover-color: #1ed760;
+    --error-color: #ff4444;
+    --success-color: #1DB954;
+    --border-radius: 500px;
+    --container-radius: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+    color: var(--text-color);
+    line-height: 1.6;
+    background: linear-gradient(-45deg, #ff7e57, #ff428a, #29c1f9, #28f4c5);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/* Main Container Box */
+.main-container {
+    background-color: var(--container-bg);
+    border-radius: var(--container-radius);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Typography */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* Buttons */
+.btn {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0.5rem;
+}
+
+.btn:hover {
+    background-color: var(--hover-color);
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #333;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    resize: none;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Checkbox styling */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+    line-height: normal;
+}
+
+/* Hide the default checkbox */
+.checkbox-container input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Custom checkbox */
+.checkbox-container label {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    cursor: pointer;
+    position: relative;
+    padding-left: 28px;  /* Space for checkbox */
+}
+
+/* Creating the custom checkbox */
+.checkbox-container label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background-color: #333;
+    border: 2px solid #1DB954;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+/* Creating the checkmark */
+.checkbox-container label::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    width: 6px;
+    height: 10px;
+    border: solid #1DB954;
+    border-width: 0 2px 2px 0;
+    transform-origin: center;
+    transform: translateY(-65%) scale(0) rotate(45deg);
+    transition: all 0.2s ease;
+}
+
+/* Show checkmark when checkbox is checked */
+.checkbox-container input[type="checkbox"]:checked + label::before {
+    background-color: #333;
+}
+
+.checkbox-container input[type="checkbox"]:checked + label::after {
+    transform: translateY(-65%) scale(1) rotate(45deg);
+}
+
+/* Hover effect */
+.checkbox-container label:hover::before {
+    border-color: #1ed760;
+}
+
+/* Button Container */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Playlist Preview */
+.playlist-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: #282828;
+    border-radius: 8px;
+}
+
+.playlist-iframe {
+    width: 100%;
+    height: 480px;
+    border: none;
+    border-radius: 8px;
+}
+
+/* Success/Error Messages */
+.message {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.success {
+    background-color: var(--success-color);
+}
+
+.error {
+    background-color: var(--error-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    .main-container {
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .playlist-iframe {
+        height: 380px;
+    }
+
+    .button-container {
+        flex-direction: column;
+    }
+}
+
+/* Logo styling */
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    max-width: 600px;  /* Adjust this value based on your logo size */
+    height: auto;
+    margin: 0 auto;
+}
+.main-container {
+    background-color: var(--container-bg);
+    border-radius: var(--container-radius);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(29, 185, 84);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Content wrapper to prevent logo overlap */
+.content-wrapper {
+    padding-top: 50px;
+}
+
+/* Corner Logo */
+.corner-logo {
+    position: absolute;
+    top: 20px;
+    left: 5px;
+    width: 170px;
+    height: auto;
+    z-index: 1;
+}
+
+.corner-logo img {
+    width: 100%;
+    height: auto;
+}
+
+/* Make main-container relative for absolute positioning of logo */
+.main-container {
+    position: relative;
+}

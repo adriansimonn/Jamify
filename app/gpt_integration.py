@@ -1,5 +1,4 @@
 import openai
-import json
 from config import OPENAI_API_KEY
 
 openai.api_key = OPENAI_API_KEY
@@ -33,6 +32,34 @@ def generateKeyphrases(desc):
         keyphrases = response.split(",")
         print("keyphrases: ", keyphrases)
         return keyphrases
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+def generatePlaylistName(desc):
+    messages = [
+        {"role": "system", "content": "You are an assistant that generates playlist names from playlist descriptions."},
+        {"role": "user", "content": f"""
+        Given a short description of a playlist, come up with one short and effective playlist name that accurately reflects the provided description.
+        Rules to follow:
+         1. Output nothing but the generated name, do not say anything other than the name.
+         2. If you cannot generate a name, just say "none".
+        
+        Playlist Description: {desc}
+        """}
+    ]
+
+    try:
+        rawResponse = openai.ChatCompletion.create(
+            model="gpt-4o", 
+            messages=messages,
+            max_tokens=300,
+            temperature=0.5,
+        )
+        response = rawResponse["choices"][0]["message"]["content"]
+        print("GPT Generated Name: ", response)
+        return response
 
     except Exception as e:
         print(f"An error occurred: {e}")

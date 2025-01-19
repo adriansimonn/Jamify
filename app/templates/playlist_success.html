@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success | Jamify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="corner-logo">
+            <img src="{{ url_for('static', filename='images/logohc.png') }}" alt="Logo">
+        </div>
+        <div class="content-wrapper">
+            <h1>Playlist added to your Spotify library!</h1>
+            <div class="button-container">
+                <button class="btn" onclick="window.location.href='/create_playlist'">Done</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,7 +7,11 @@ def searchForPlaylists(accessToken, keywords):
     playlists = []
     for k in keywords:
         parameters = {"q": k, "type": "playlist", "limit": 5}
-        response = requests.get(searchURL, headers=headers, params=parameters)
+        try:
+            response = requests.get(searchURL, headers=headers, params=parameters)
+        except Exception as e:
+            print("Failed to fetch playlists as an exception has occurred: {e}")
+            return None
         if response.status_code == 200:
             playlists.extend(response.json().get("playlists", {}).get("items", []))
         else:
@@ -15,7 +19,7 @@ def searchForPlaylists(accessToken, keywords):
             return None
     return playlists
 
-def getPotentialTracks(accessToken, playlists, numSongs):
+def getPotentialTracks(accessToken, playlists, numSongs, excludeExplicit):
     tracks = {}
     size = min(numSongs, 100)
     for p in playlists:
@@ -30,11 +34,17 @@ def getPotentialTracks(accessToken, playlists, numSongs):
 
         tracksURL = f"https://api.spotify.com/v1/playlists/{playlistID}/tracks"
         headers = {"Authorization": f"Bearer {accessToken}"}
-        response = requests.get(tracksURL, headers=headers)
+        try:
+            response = requests.get(tracksURL, headers=headers)
+        except Exception as e:
+            print("Failed to fetch tracks as an exception has occurred: {e}")
+            return None
         if response.status_code == 200:
             for item in response.json().get("items", []):
                 track = item.get("track")
                 if track:
+                    if excludeExplicit and track.get("explicit", False):
+                        continue
                     trackID = track.get("id")
                     if trackID:
                         tracks[trackID] = tracks.get(trackID, 0) + 1
@@ -54,21 +64,6 @@ def getTokenFromCode(code):
     }
     response = requests.post(tokenUrl, data=apiData)
     return response.json().get('access_token')
-
-def getPreviewURLS(access_token):
-    headers = {"Authorization": f"Bearer {access_token}"}
-    playlistUrl = "https://api.spotify.com/v1/me/playlists"
-    response = requests.get(playlistUrl, headers=headers).json()
-
-    preview_urls = []
-    for playlist in response['items']:
-        tracksUrl = playlist['tracks']['href']
-        tracks = requests.get(tracksUrl, headers=headers).json()
-        for track in tracks['items']:
-            preview_url = track['track'].get('preview_url')
-            if preview_url:
-                preview_urls.append(preview_url)
-    return preview_urls
 
 def getUserID(accessToken):
     url = "https://api.spotify.com/v1/me"
@@ -91,6 +86,8 @@ def createTempPlaylist(accessToken, userID):
         "public": False
     }
     response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 403:
+        return "whitelist needed"
     if response.status_code != 201:
         print(f"Error creating playlist: {response.status_code}, {response.text}")
         return None
@@ -108,62 +105,32 @@ def addTracksToPlaylist(accessToken, playlistID, trackURIs):
     else:
         print(f"Tracks added successfully to playlist {playlistID}")
 
-def getAllGenres():
-    validGenres = [
-        "acoustic", "afrobeat", "alt-rock", "alternative", "ambient", "anime", "black-metal",
-        "bluegrass", "blues", "bossanova", "brazil", "breakbeat", "british", "cantopop",
-        "chicago-house", "children", "chill", "classical", "club", "comedy", "country",
-        "dance", "dancehall", "death-metal", "deep-house", "detroit-techno", "disco",
-        "disney", "drum-and-bass", "dub", "dubstep", "edm", "electro", "electronic",
-        "emo", "folk", "forro", "french", "funk", "garage", "german", "gospel", "goth",
-        "grindcore", "groove", "grunge", "guitar", "happy", "hard-rock", "hardcore",
-        "hardstyle", "heavy-metal", "hip-hop", "holidays", "honky-tonk", "house",
-        "idm", "indian", "indie", "indie-pop", "industrial", "iranian", "j-dance",
-        "j-idol", "j-pop", "j-rock", "jazz", "k-pop", "kids", "latin", "latino",
-        "malay", "mandopop", "metal", "metal-misc", "metalcore", "minimal-techno",
-        "movies", "mpb", "new-age", "new-release", "opera", "pagode", "party", "philippines-opm",
-        "piano", "pop", "pop-film", "post-dubstep", "power-pop", "progressive-house",
-        "psych-rock", "punk", "punk-rock", "r-n-b", "rainy-day", "reggae", "reggaeton",
-        "road-trip", "rock", "rock-n-roll", "rockabilly", "romance", "sad", "salsa",
-        "samba", "sertanejo", "show-tunes", "singer-songwriter", "ska", "sleep", "songwriter",
-        "soul", "soundtracks", "spanish", "study", "summer", "swedish", "synth-pop",
-        "tango", "techno", "trance", "trip-hop", "turkish", "work-out", "world-music"
-    ]
-    return validGenres
-
-def getArtistID(accessToken, artistName):
-    url = f"https://api.spotify.com/v1/search?q={artistName}&type=artist"
-    headers = {"Authorization": f"Bearer {accessToken}"}
-    response = requests.get(url, headers=headers)
-    items = response.json().get("artists", {}).get("items", [])
-    return items[0]["id"] if items else None
-
-def getTrackID(accessToken, trackName):
-    url = f"https://api.spotify.com/v1/search?q={trackName}&type=track&limit=1"
-    headers = {"Authorization": f"Bearer {accessToken}"}
-    response = requests.get(url, headers=headers).json()
-    items = response.get("tracks", {}).get("items", [])
-    return items[0]["id"] if items else None
-
-def test_spotify_api(accessToken):
+def updatePlaylist(accessToken, playlistID, name, description):
+    print(f"Updating playlist - Name: {name}, Description: {description}")  # Debug print
+    url = f"https://api.spotify.com/v1/playlists/{playlistID}"
     headers = {
         "Authorization": f"Bearer {accessToken}",
-        "Accept": "application/json"
+        "Content-Type": "application/json"
     }
-    
-    # Test endpoints
-    endpoints = {
-        "Me": "https://api.spotify.com/v1/me",
-        "New Releases": "https://api.spotify.com/v1/browse/new-releases"
+    data = {
+        "name": name,
+        "description": description
     }
-    
-    for name, url in endpoints.items():
-        try:
-            response = requests.get(url, headers=headers)
-            print(f"\n{name} Endpoint:")
-            print(f"URL: {url}")
-            print(f"Status Code: {response.status_code}")
-            print(f"Headers: {response.headers}")
-            print(f"Response: {response.text[:200]}...")  # First 200 chars of response
-        except Exception as e:
-            print(f"Error testing {name} endpoint: {e}")
+    print(f"Update playlist request data: {data}")  # Debug print
+    response = requests.put(url, headers=headers, json=data)
+    if response.status_code != 200:
+        print(f"Error updating playlist: {response.status_code}, {response.text}")
+        return False
+    return True
+
+def deletePlaylist(accessToken, playlistID):
+    """
+    Delete a playlist
+    """
+    url = f"https://api.spotify.com/v1/playlists/{playlistID}/followers"
+    headers = {"Authorization": f"Bearer {accessToken}"}
+    response = requests.delete(url, headers=headers)
+    if response.status_code != 200:
+        print(f"Error deleting playlist: {response.status_code}, {response.text}")
+        return False
+    return True

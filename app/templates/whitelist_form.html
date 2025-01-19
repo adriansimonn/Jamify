@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whitelist Request</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="corner-logo">
+            <img src="{{ url_for('static', filename='images/logohc.png') }}" alt="Logo">
+        </div>
+        <h1>Request Access</h1>
+        <p>Your Spotify account has not been whitelisted yet. Enter the email associated with your Spotify account below to request access.</p>
+
+        <form action="/submit_email" method="POST">
+            <div class="form-group">
+                <label for="email">Spotify Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your Spotify email" required>
+            </div>
+
+            <div class="button-container">
+                <button type="submit" class="btn">Submit</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
