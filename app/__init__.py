@@ -1,6 +1,6 @@
 from flask import Flask
 
-def create_app():
+def create_app(*args, **kwargs):
     app = Flask(__name__)
     app.config.from_object('config')
     
