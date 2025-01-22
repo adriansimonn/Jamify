@@ -168,4 +168,4 @@ def submit_email():
 
         return render_template('whitelist_success.html')
     except Exception as e:
-        return redirect(url_for('/whitelist_form'))
+        return redirect(url_for('routes.whitelist_request'))
