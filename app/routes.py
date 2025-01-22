@@ -7,11 +7,6 @@ bp = Blueprint('routes', __name__)
 mail = Mail()
 
 def init_mail(app):
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = 'jamifywhitelist@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'your-app-specific-password'  # Use app-specific password from Gmail
     mail.init_app(app)
 
 @bp.route('/')
