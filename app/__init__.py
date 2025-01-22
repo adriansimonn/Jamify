@@ -6,6 +6,7 @@ def create_app(*args, **kwargs):
     
     with app.app_context():
         from . import routes
+        routes.init_mail(app)
         app.register_blueprint(routes.bp)
     
     return app
