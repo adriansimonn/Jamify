@@ -1,9 +1,10 @@
 from flask import Blueprint, redirect, request, session, url_for, current_app, render_template
 from .spotify import getPotentialTracks, searchForPlaylists, getTokenFromCode, getUserID, createTempPlaylist, addTracksToPlaylist, updatePlaylist, deletePlaylist
 from .gpt_integration import generateKeyphrases, generatePlaylistName
-import os
+from flask_mail import Mail, Message
 
 bp = Blueprint('routes', __name__)
+mail = Mail()
 
 @bp.route('/')
 def home():
@@ -158,13 +159,12 @@ def submit_email():
     if not email or email.index("@") == -1:
         return redirect(url_for('/whitelist_request'))
 
-    # Save the email to a file or database (e.g., append to a text file)
+    # Sends email to developer containing email that has requested to be on whitelist.
+    # This feature exists due to Spotify Web API's limitations in development mode. Extended quota mode has too many design requirements and takes too long for approval.
     try:
-        whitelist_file = os.path.join(current_app.instance_path, 'whitelist_requests.txt')
-        os.makedirs(os.path.dirname(whitelist_file), exist_ok=True)
-    
-        with open(whitelist_file, 'a') as f:
-            f.write(f"{email}\n")
+        msg = Message('New Whitelist Request', sender='jamifywhitelist@gmail.com', recipients=['adriansimon477@gmail.com'])
+        msg.body = f"New whitelist request received: {email}"
+        mail.send(msg)
 
         return render_template('whitelist_success.html')
     except Exception as e:
