@@ -1,3 +1,6 @@
+# Author: Adrian Simon
+# Flask app initialization
+
 from flask import Flask
 
 def create_app(*args, **kwargs):

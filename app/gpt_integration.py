@@ -1,8 +1,15 @@
+# Author: Adrian Simon
+# This file contains functions that integrate OpenAI API's natural language processing abilities.
+# Two functions are created here, one being used to extract keyphrases from the user-inputted description,
+# the other being used to generate a suggested name for the playlist.
+
 import openai
 from config import OPENAI_API_KEY
 
 openai.api_key = OPENAI_API_KEY
 
+# Generates keyphrases from user-inputted description, takes a description string and returns a list of keyphrases.
+# If description cannot be deciphered or is nonsense, None is returned.
 def generateKeyphrases(desc):
     messages = [
         {"role": "system", "content": "You are an assistant that extracts keyphrases from descriptions."},
@@ -20,6 +27,7 @@ def generateKeyphrases(desc):
     ]
 
     try:
+        # GPT-4o generates the best keyphrases and is cost efficient.
         rawResponse = openai.ChatCompletion.create(
             model="gpt-4o", 
             messages=messages,
@@ -36,7 +44,9 @@ def generateKeyphrases(desc):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-    
+
+# Generates a suggested playlist name from user-inputted description, returns suggested name.
+# If no name can be generated, None is returned.  
 def generatePlaylistName(desc):
     messages = [
         {"role": "system", "content": "You are an assistant that generates playlist names from playlist descriptions."},

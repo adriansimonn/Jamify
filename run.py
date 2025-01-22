@@ -1,3 +1,6 @@
+# Author: Adrian Simon
+# Creates and runs application
+
 from app import create_app
 
 app = create_app()
