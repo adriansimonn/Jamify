@@ -1,12 +1,1 @@
-# Ignore Python bytecode and virtual environments
-__pycache__/
-*.pyc
-venv/
-
-# Ignore config and secret files
 config.py
-.env
-
-# Ignore IDE and OS-specific files
-.DS_Store
-*.log
