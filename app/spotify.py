@@ -27,6 +27,58 @@ def searchForPlaylists(accessToken, keyphrases):
             return None
     return playlists
 
+# Takes list of tracks (from getPotentialTracks() function) and integer k (number of songs requested) and returns the top-k most frequent tracks.
+# Uses a manually implemented min-heap of size k to keep track of the k most frequent track IDs in increasing order
+# Returns heap contents as list sorted by descending values (track IDs with highest frequencies appear first)
+# A min-heap of size k is used (instead of a max-heap) to efficiently keep track of only the k most frequent tracks.
+# This avoids storing all n elements, reducing both time (O(n log k) vs O(n + k log n)) and space (O(k) vs O(n)).
+# After processing, the heap is reverse-sorted to return the tracks in descending order of frequency.
+def topKMostFrequentTracks(tracks, k):
+    heap = []
+
+    # Swaps element at given index up the min-heap to maintain min-heap property
+    def swapUp(index):
+        while index > 0:
+            parent = (index - 1) // 2
+            if heap[index][0] < heap[parent][0]:
+                heap[index], heap[parent] = heap[parent], heap[index]
+                index = parent
+            else:
+                break
+    
+    # Swaps element at given index down the min-heap to maintain min-heap property
+    def swapDown(index):
+        size = len(heap)
+        while True:
+            left, right = 2 * index + 1, 2 * index + 2
+            smallest = index
+
+            if left < size and heap[left][0] < heap[smallest][0]:
+                smallest = left
+            if right < size and heap[right][0] < heap[smallest][0]:
+                smallest = right
+
+            if smallest != index:
+                heap[index], heap[smallest] = heap[smallest], heap[index]
+                index = smallest
+            else:
+                break
+    
+    # Builds min-heap of top k elements
+    for trackID, freq in tracks.items():
+        heap.append((freq, trackID))
+        swapUp(len(heap) - 1)
+
+        if len(heap) > k:
+            # pop smallest (root)
+            heap[0], heap[-1] = heap[-1], heap[0]
+            heap.pop()
+            swapDown(0)
+
+    # Sort remaining heap in descending order by frequency and then returns it
+    result = sorted(heap, key=lambda x: -x[0])
+    return [(track_id, freq) for freq, track_id in result]
+
 # Takes list of playlists (from searchForPlaylists() function) and other user-inputted settings and returns a list of potential tracks.
 # Creates dictionary with every track, counts the frequency of each track across all playlists, sorts them in descending order, and returns the tracks.
 # Essentially, the songs that appear most frequently in existing Spotify playlists that match the extracted keyphrases are pushed to the top of the generated playlist.
@@ -65,7 +117,7 @@ def getPotentialTracks(accessToken, playlists, numSongs, excludeExplicit):
         else:
             print(f"Error fetching tracks for playlist {playlistID}: {response.status_code}")
     
-    return sorted(tracks, key=tracks.get, reverse=True)[:size]
+    return topKMostFrequentTracks(tracks, numSongs)
 
 # Returns access token for Spotify Web API, this is written as a function due to the fact that the access token is not constant and is unique to each session.
 def getTokenFromCode(code):
