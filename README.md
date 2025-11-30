@@ -36,35 +36,35 @@ These phrases are optimized for Spotify search.
 
 ### 2. Phrase-Based Spotify Playlist Search
 Each extracted phrase is used to query the Spotify Web API.
-Jamify fetches publicly available playlists that match the input meaning.
 
-For each playlist result, Jamify extracts its track IDs, filtering out duplicates and invalid entries.
+Jamify fetches publicly available playlists that semantically correlate with the key phrases.
 
 
 ### 3. Track Frequency Heap Construction
 
-From all retrieved playlists, every track ID is pushed into a min-heap (scroll to the bottom for an explanation on why I used a min-heap) and hashing is incorporated for O(1) frequency access and updates; track ID is key, frequency is value.
+For each playlist result, Jamify extracts its track IDs, filtering out invalid entries and storing track IDs as keys in a hash map with their corresponding frequencies as values. The hash map is used to access and update track ID frequencies in O(1) time.
 
-Tracks are counted across all playlists, and the ones frequently appearing across multiple relevant playlists rise to the top.
+Once all tracks IDs are stored, every track ID is pushed into a min-heap (scroll to the bottom for an explanation on why I used a min-heap).
+
+Tracks are counted across all playlists, and the ones frequently appearing across multiple relevant public playlists rise to the top.
 
 This ensures the playlist is consensus-driven rather than random.
 
 
 ### 4. Select Top-K Tracks → Generate Playlist Preview
 
-Jamify pops the top K most frequent tracks (e.g., K = 30).
-These tracks—ranked by relevance—are added to a temporary playlist via the Spotify Web API, and the user can:
+Jamify pops the top K most frequent tracks from the min-heap (ex: K = 30 means playlist of 30 tracks).
+These tracks, which are ranked by relevance (frequency), are added to a temporary playlist via the Spotify Web API, and the user can:
 
-▶️ Preview it
+##### ▶️ Preview it
 
+##### ❌ Discard it
 
-❌ Discard it
+##### 💾 Save it permanently to their Spotify library
 
-💾 Save it permanently to their Spotify library
+If saved, Jamify suggests a name for the playlist based on the user-inputted description (via OpenAI API) and the playlist is saved in the user’s Spotify account!
 
-If saved, the playlist becomes part of the user’s account.
-
-If discarded, Jamify simply regenerates or ends the session nothing is stored server-side!
+If discarded, Jamify simply loops back to the beginning of the flow, prompting the user to try again (nothing is stored server-side).
 
 ## Tech Stack
 Backend: Python, Flask
@@ -85,17 +85,18 @@ When storing items by a certain value (in the case of Jamify, frequency of track
 
 #### Here is why I used a min-heap instead:
 
-Min-heap keeps the k largest frequencies by evicting the smallest element when we find a larger one. We only need k items, so we track the "minimum threshold" that makes the top-k cut.
+A min-heap keeps the k largest frequencies by evicting the smallest element when we find a larger one. We only need k items, so we track the "minimum threshold" that makes the top-k cut.
 
-Max-heap would require processing all n items, defeating the purpose.
+A max-heap would require processing all n items, creating a clear inefficiency with a time complexity of O(n + k log n).
 
 Min-heaps also have a better time complexity than sorting: O(n log k) vs O(n log n)
 
 With the typical number of track IDs (n) and the user-requested playlist length (k) falling within a certain range on average (n ≈ 250-2000, k ≈ 30-100), we only maintain a heap of size k instead of sorting all n items (Example: n=2000, k=50 → ~13,000 operations vs ~22,000 for full sort).
 
-Min-heaps are also much more space efficient: O(k) heap size instead of O(n) for full sorting. With k capped at 100, heap never exceeds 100 elements regardless of n (which can reach 50,000)
+Min-heaps are also much more space efficient: O(1) heap size instead of O(n) for full sorting. With k capped at 100, heap never exceeds 100 elements (constant space) regardless of n (which is boundless)
 
 
-Time complexity: O(n log k) where k << n.
+Time complexity: O(n log k)
 
-Space complexity: O(n) for frequency map + O(k) for heap.
+Space complexity: O(n) for frequency map + O(1) for heap.
+
