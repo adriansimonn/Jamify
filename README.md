@@ -7,6 +7,7 @@
 
 Jamify is an AI-powered Spotify playlist generator built with Python & Flask, using OpenAI for natural-language interpretation, the Spotify Web API for discovering and assembling playlists, and Heroku for deployment.
 Users describe a their desired playlist in plain English and Jamify generates a personalized playlist using data driven track selection rather than relying on guessing genres or keywords.
+#### Note: A full year after my initial Jamify release, Spotify has integrated a natural language based playlist generator into their app!
 
 ## [🎥 Video Demo!](https://drive.google.com/file/d/1dzbnYg9hnm28ix4UWj7Xkb76HB2VM_yC/view?usp=sharing)
 
@@ -79,7 +80,6 @@ Email Service: Flask-Mail (for whitelist requests)
 
 ## [🔗 Jamify Link!](https://jamifymusic-a870f58d8b7c.herokuapp.com/)
 #### Important Note: Due to limitations with the Spotify Web API's development mode, only 20 whitelisted users are allowed to use Jamify at a time. To get on the whitelist, simply open Jamify and attempt to create a playlist, once prompted, enter your email and you will be added!
-#### Another note: A full year after my initial Jamify's release, Spotify has integrated a natural language based playlist generator into their app!
 
 ## Why a Min-Heap?
 When storing items by a certain value (in the case of Jamify, frequency of track IDs), the conventional way to access the elements with the highest values would be to pop from a Max-Heap or use sorting.
@@ -100,6 +100,7 @@ Min-heaps are also much more space efficient: O(1) heap size instead of O(n) for
 Time complexity: O(n log k)
 
 Space complexity: O(n) for frequency map + O(1) for heap.
+
 
 
 
